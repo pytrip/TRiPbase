@@ -1,12 +1,9 @@
 import os
+import sys
+import logging
 import numpy as np
 
-def create_dirs():
-    try:
-        os.makedirs("path/to/directory")
-    except FileExistsError:
-        # directory already exists
-        pass
+logger = logging.getLogger(__name__)
 
 
 class Ion(object):
@@ -20,31 +17,6 @@ class Ion(object):
         self.emax = 0.0
         self.estep = 0.0
         self.fwhm = 0.0
-
-
-def read_ions(fname):
-    temp_str = np.loadtxt(fname, dtype=str, usecols=0)
-    temp_int = np.loadtxt(fname, dtype=int, usecols=(1, 2, 3))
-    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7, 8))
-
-    print(temp_str)
-    print("length: ", len(temp_str))
-    ions = [None] * len(temp_str)
-    print(len(ions))
-
-    for i, name in enumerate(temp_str):
-        print(i)
-        ions[i] = Ion()
-        ions[i].name = name
-        ions[i].jpart = temp_int[i][0]
-        ions[i].z = temp_int[i][1]
-        ions[i].n = temp_int[i][2]
-        ions[i].u = temp_float[i][0]
-        ions[i].emin = temp_float[i][1]
-        ions[i].emax = temp_float[i][2]
-        ions[i].estep = temp_float[i][3]
-        ions[i].fwhm = temp_float[i][4]
-    return ions
 
 
 class Template(object):
@@ -69,26 +41,76 @@ class Template(object):
         with open(fname_det) as file:
             self.det = file.readlines()
 
-    def generate_dats(self, ion, energy, nstat, nsave):
-        self.path = os.path.join(".", ion.name, str(energy))
-        self.beam = [line.replace('$JPART', "{:d}".format(ion.jpart)) for line in self.beam]
-        self.beam = [line.replace('$ENERGY', "{:f}".format(energy)) for line in self.beam]
-        self.beam = [line.replace('$SIGX', "{:f}".format(ion.fwhm / 2.355)) for line in self.beam]
-        self.beam = [line.replace('$SIGY', "{:f}".format(ion.fwhm / 2.355)) for line in self.beam]
-        self.beam = [line.replace('$NSTAT', "{:d}".format(nstat)) for line in self.beam]
-        self.beam = [line.replace('$NSAVE', "{:d}".format(nsave)) for line in self.beam]
+    def write(self, ion):
+        try:
+            os.makedirs(self.path)
+        except FileExistsError:
+            pass
+
+        fname_beam = os.path.join(self.path, "beam.dat")
+        fname_geo = os.path.join(self.path, "geo.dat")
+        fname_mat = os.path.join(self.path, "mat.dat")
+        fname_det = os.path.join(self.path, "detect.dat")
+
+        with open(fname_beam, 'w') as file:
+            file.writelines(self.beam)
+        with open(fname_geo, 'w') as file:
+            file.writelines(self.geo)
+        with open(fname_mat, 'w') as file:
+            file.writelines(self.mat)
+        with open(fname_det, 'w') as file:
+            file.writelines(self.det)
+
+    def generate_dats(self, ion, energy, nstat, nsave, rifi=False):
+        print(energy)
+        if rifi:
+            r = 2
+        else:
+            r = 0
+        self.path = os.path.join(".", "wdir", ion.name, "{:05.2f}".format(energy))
+        self.beam = [line.replace('$JPART', "{:6d}".format(ion.jpart)) for line in self.beam]
+        self.beam = [line.replace('$ENERGY', "{:6.2f}".format(energy)) for line in self.beam]
+        self.beam = [line.replace('$SIGX', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
+        self.beam = [line.replace('$SIGY', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
+        self.beam = [line.replace('$NSTAT', "{:6d}".format(nstat)) for line in self.beam]
+        self.beam = [line.replace('$NSAVE', "{:6d}".format(nsave)) for line in self.beam]
+        self.geo = [line.replace('$RIF', "{:3d}".format(r)) for line in self.beam]
 
 
-nstat = 10000
-nsave = 5000
-ions = read_ions("config.dat")
-t = Template()
-t.read("template")
-for ion in ions:
-    energy = 125.0
-    t.generate_dats(ion, energy, nstat, nsave)
+def read_ions(fname):
+    temp_str = np.loadtxt(fname, dtype=str, usecols=0)
+    temp_int = np.loadtxt(fname, dtype=int, usecols=(1, 2, 3))
+    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7, 8))
 
-print(t.beam)
-with open("foobar.dat", 'w') as file:
-    file.writelines(t.beam)
-print(t.path)
+    ions = [None] * len(temp_str)
+
+    for i, name in enumerate(temp_str):
+        print(i)
+        ions[i] = Ion()
+        ions[i].name = name
+        ions[i].jpart = temp_int[i][0]
+        ions[i].z = temp_int[i][1]
+        ions[i].n = temp_int[i][2]
+        ions[i].u = temp_float[i][0]
+        ions[i].emin = temp_float[i][1]
+        ions[i].emax = temp_float[i][2]
+        ions[i].estep = temp_float[i][3]
+        ions[i].fwhm = temp_float[i][4]
+    return ions
+
+
+def main(args):
+    nstat = 10000
+    nsave = 5000
+    ions = read_ions("config.dat")
+    t = Template()
+    t.read("template")
+    for ion in ions:
+        for energy in np.arange(ion.emin, ion.emax, ion.estep):
+            t.generate_dats(ion, energy, nstat, nsave)
+            t.write(ion)
+
+
+if __name__ == '__main__':
+    logging.basicConfig()
+    sys.exit(main(sys.argv[1:]))
