@@ -7,6 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 class Ion(object):
+    """
+    Class holding all attributes for a single ion configuration.
+    """
     def __init__(self):
         self.name = ""
         self.jpart = 0
@@ -20,11 +23,23 @@ class Ion(object):
 
 
 class Template(object):
+    """
+    Class for manipulating the SHIELD-HIT12A input files.
+    """
     def __init__(self):
+        # placeholder for SH12A templates
+        self.tbeam = []
+        self.tgeo = []
+        self.tmat = []
+        self.tdet = []
+
+        # placeholder for output
         self.beam = []
         self.geo = []
         self.mat = []
         self.det = []
+
+        self.rifi_path = ""  # relative path from current wdir to rifi path.
 
     def read(self, dir):
         fname_beam = os.path.join(dir, "beam.dat")
@@ -33,13 +48,13 @@ class Template(object):
         fname_det = os.path.join(dir, "detect.dat")
 
         with open(fname_beam) as file:
-            self.beam = file.readlines()
+            self.tbeam = file.readlines()
         with open(fname_geo) as file:
-            self.geo = file.readlines()
+            self.tgeo = file.readlines()
         with open(fname_mat) as file:
-            self.mat = file.readlines()
+            self.tmat = file.readlines()
         with open(fname_det) as file:
-            self.det = file.readlines()
+            self.tdet = file.readlines()
 
     def write(self, ion):
         try:
@@ -62,22 +77,38 @@ class Template(object):
             file.writelines(self.det)
 
     def generate_dats(self, ion, energy, nstat, nsave, rifi=False):
-        print(energy)
+        """
+        Generate the input files for SH12A.
+        """
         if rifi:
             r = 2
+            _rifidir = "RF3MM"
         else:
             r = 0
-        self.path = os.path.join(".", "wdir", ion.name, "{:05.2f}".format(energy))
-        self.beam = [line.replace('$JPART', "{:6d}".format(ion.jpart)) for line in self.beam]
-        self.beam = [line.replace('$ENERGY', "{:6.2f}".format(energy)) for line in self.beam]
+            _rifidir = "RF0MM"
+
+        self.path = os.path.join(".", "wdir", ion.name, _rifidir, "{:06.2f}".format(energy))
+
+        # first line should read from template.
+        self.beam = [line.replace('$JPART', "{:6d}".format(ion.jpart)) for line in self.tbeam]
+        self.beam = [line.replace('$ENERGY', "{:7.2f}".format(energy)) for line in self.beam]
         self.beam = [line.replace('$SIGX', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
         self.beam = [line.replace('$SIGY', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
         self.beam = [line.replace('$NSTAT', "{:6d}".format(nstat)) for line in self.beam]
         self.beam = [line.replace('$NSAVE', "{:6d}".format(nsave)) for line in self.beam]
-        self.geo = [line.replace('$RIF', "{:3d}".format(r)) for line in self.beam]
+
+        if rifi:
+            self.beam.append("BMODMC          1                ! For MC ripple filter\n")
+            # specifying zone 4, and filename of ripple filter
+            self.beam.append("USEBMOD         4 {}\n".format(self.rifi_path))
+
+        self.geo = [line.replace('$RIF', "{:4d}".format(r)) for line in self.tgeo]
 
 
-def read_ions(fname):
+def read_config(fname):
+    """
+    Read the config file, returns list of Ion objects.
+    """
     temp_str = np.loadtxt(fname, dtype=str, usecols=0)
     temp_int = np.loadtxt(fname, dtype=int, usecols=(1, 2, 3))
     temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7, 8))
@@ -85,7 +116,6 @@ def read_ions(fname):
     ions = [None] * len(temp_str)
 
     for i, name in enumerate(temp_str):
-        print(i)
         ions[i] = Ion()
         ions[i].name = name
         ions[i].jpart = temp_int[i][0]
@@ -100,14 +130,25 @@ def read_ions(fname):
 
 
 def main(args):
+    """
+    Main function.
+    """
+    logger.setLevel('INFO')
     nstat = 10000
     nsave = 5000
-    ions = read_ions("config.dat")
+
+    ions = read_config("config.dat")
+
     t = Template()
     t.read("template")
+    t.rifi_path = "../../../../template/1drifi3.dat"  # relative path to SH12A wdir
+
     for ion in ions:
+        logger.info(ion.name)
         for energy in np.arange(ion.emin, ion.emax, ion.estep):
-            t.generate_dats(ion, energy, nstat, nsave)
+            t.generate_dats(ion, energy, nstat, nsave, rifi=True)
+            t.write(ion)
+            t.generate_dats(ion, energy, nstat, nsave, rifi=False)
             t.write(ion)
 
 

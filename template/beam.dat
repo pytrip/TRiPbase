@@ -8,5 +8,3 @@ DELTAE          0.005            ! lower min relative energy transfer
 STRAGG          2                ! Straggling: 0-Off 1-Gauss, 2-Vavilov
 MSCAT           2                ! Mult. scatt 0-Off 1-Gauss, 2-Moliere
 NUCRE           1                ! Nucl.Reac. switcher: 1-ON, 0-OFF
-BMODMC          1                ! For MC ripple filter
-USEBMOD         4 1drifi3.dat    ! specifying zone 4, and filename of ripple filter
