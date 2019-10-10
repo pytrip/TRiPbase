@@ -91,6 +91,9 @@ class Template(object):
 
         # first line should read from template.
         self.beam = [line.replace('$JPART', "{:6d}".format(ion.jpart)) for line in self.tbeam]
+        if ion.jpart == 25:  # Heavy ions
+            self.beam.append("HIPROJ     	{:2d}    {:2d}\n".format(ion.n, ion.z))  # OK to add at the bottom
+
         self.beam = [line.replace('$ENERGY', "{:7.2f}".format(energy)) for line in self.beam]
         self.beam = [line.replace('$SIGX', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
         self.beam = [line.replace('$SIGY', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
