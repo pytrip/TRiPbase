@@ -1,6 +1,6 @@
-RNDSEED      	89736501         ! Random seed
-JPART0       	$JPART           ! Incident particle type
-TMAX0      		$ENERGY   0.0    ! Incident energy; (MeV/nucl)
+RNDSEED         89736501         ! Random seed
+JPART0          $JPART           ! Incident particle type
+TMAX0           $ENERGY   0.0    ! Incident energy; (MeV/nucl)
 NSTAT           $NSTAT	 $NSAVE  ! NSTAT, Step of saving
 BEAMSIGMA       $SIGX    $SIGY   ! beam width
 BEAMPOS         0   0   -2.0     !
