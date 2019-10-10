@@ -40,12 +40,15 @@ class Template(object):
         self.det = []
 
         self.rifi_path = ""  # relative path from current wdir to rifi path.
+        self.template_dir = ""
 
     def read(self, dir):
         fname_beam = os.path.join(dir, "beam.dat")
         fname_geo = os.path.join(dir, "geo.dat")
         fname_mat = os.path.join(dir, "mat.dat")
         fname_det = os.path.join(dir, "detect.dat")
+
+        self.template_dir = dir
 
         with open(fname_beam) as file:
             self.tbeam = file.readlines()
@@ -76,6 +79,15 @@ class Template(object):
         with open(fname_det, 'w') as file:
             file.writelines(self.det)
 
+        # create links to external stopping power files.
+        dedx_list = ["Water.txt", "Lucite.txt"]
+        for fn in dedx_list:
+
+            try:
+                os.symlink(os.path.join("../../../..", self.template_dir, fn), os.path.join(self.path, fn))
+            except FileExistsError:
+                pass
+
     def generate_dats(self, ion, energy, nstat, nsave, rifi=False):
         """
         Generate the input files for SH12A.
@@ -87,6 +99,7 @@ class Template(object):
             r = 0
             _rifidir = "RF0MM"
 
+        # TODO: rename "path" -> "dir"
         self.path = os.path.join(".", "wdir", ion.name, _rifidir, "{:06.2f}".format(energy))
 
         # first line should read from template.
