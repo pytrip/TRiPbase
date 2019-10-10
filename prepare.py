@@ -43,6 +43,9 @@ class Template(object):
         self.template_dir = ""
 
     def read(self, dir):
+        """
+        Reads the template files, and stores them in self object.
+        """
         fname_beam = os.path.join(dir, "beam.dat")
         fname_geo = os.path.join(dir, "geo.dat")
         fname_mat = os.path.join(dir, "mat.dat")
@@ -60,6 +63,10 @@ class Template(object):
             self.tdet = file.readlines()
 
     def write(self, ion):
+        """
+        Write the SH12A output files to self.path for given ion.
+        Stopping power files are symlinked to the files found in template/
+        """
         try:
             os.makedirs(self.path)
         except FileExistsError:
@@ -79,10 +86,9 @@ class Template(object):
         with open(fname_det, 'w') as file:
             file.writelines(self.det)
 
-        # create links to external stopping power files.
+        # create symlinks to external stopping power files.
         dedx_list = ["Water.txt", "Lucite.txt"]
         for fn in dedx_list:
-
             try:
                 os.symlink(os.path.join("../../../..", self.template_dir, fn), os.path.join(self.path, fn))
             except FileExistsError:
@@ -90,7 +96,7 @@ class Template(object):
 
     def generate_dats(self, ion, energy, nstat, nsave, rifi=False):
         """
-        Generate the input files for SH12A.
+        Generate the input files for SH12A, and store these to self.
         """
         if rifi:
             r = 2
