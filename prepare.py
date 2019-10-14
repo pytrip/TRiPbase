@@ -10,6 +10,7 @@ class Ion(object):
     """
     Class holding all attributes for a single ion configuration.
     """
+
     def __init__(self):
         self.name = ""
         self.jpart = 0
@@ -26,6 +27,7 @@ class Template(object):
     """
     Class for manipulating the SHIELD-HIT12A input files.
     """
+
     def __init__(self):
         # placeholder for SH12A templates
         self.tbeam = []
@@ -125,6 +127,9 @@ class Template(object):
             self.beam.append("USEBMOD         4 {}\n".format(self.rifi_path))
 
         self.geo = [line.replace('$RIF', "{:4d}".format(r)) for line in self.tgeo]
+
+        self.mat = self.tmat
+        self.det = self.tdet
 
 
 def read_config(fname):
