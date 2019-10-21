@@ -5,11 +5,13 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+BEAM_DIV = 2.5        # beam divergence in mrad
+BEAM_FOCUS = 0.0      # beam focus relative to beam starting position, positive if upstream (defocussed)
 ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
 
 # ripple filter material ID, change according to mat.dat, and AIR if no RIFI
-MAT_RIFI = 4  # PMMA
-MAT_NORIFI = 2  # AIR½
+MAT_RIFI = 4          # PMMA
+MAT_NORIFI = 2        # AIR
 
 # Zone number oif RIFI, as specified in geo.dat
 ZONE_RIFI = 4
@@ -137,6 +139,10 @@ class Template(object):
         self.beam = [line.replace('$SIGY', "{:6.3f}".format(_sigma)) for line in self.beam]
         self.beam = [line.replace('$NSTAT', "{:6d}".format(nstat)) for line in self.beam]
         self.beam = [line.replace('$NSAVE', "{:6d}".format(nsave)) for line in self.beam]
+
+        self.beam.append("BEAMDIV        {:6.3f} {:6.3f} {:6.3f}  ! beam divergence \n".format(BEAM_DIV,
+                                                                                               BEAM_DIV,
+                                                                                               BEAM_FOCUS))
 
         if rifi:
             self.beam.append("BMODMC          1                ! For MC ripple filter\n")
