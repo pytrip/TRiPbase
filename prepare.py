@@ -101,7 +101,7 @@ class Template(object):
         Generate the input files for SH12A, and store these to self.
         """
         if rifi:
-            r = 2
+            r = 3  # ripple filter material ID, change according to mat.dat
             _rifidir = "RF3MM"
         else:
             r = 0
