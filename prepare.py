@@ -89,7 +89,7 @@ class Template(object):
             file.writelines(self.det)
 
         # create symlinks to external stopping power files.
-        dedx_list = ["Water.txt", "Lucite.txt"]
+        dedx_list = ["Water.txt", "Lucite.txt", "Air.txt", "Ti.txt"]
         for fn in dedx_list:
             try:
                 os.symlink(os.path.join("../../../..", self.template_dir, fn), os.path.join(self.path, fn))
