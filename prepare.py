@@ -104,7 +104,7 @@ class Template(object):
             r = 3  # ripple filter material ID, change according to mat.dat
             _rifidir = "RF3MM"
         else:
-            r = 0
+            r = 4  # if no ripple filter, we substitue with air according to mat.dat
             _rifidir = "RF0MM"
 
         # TODO: rename "path" -> "dir"
