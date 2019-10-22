@@ -5,6 +5,20 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+BEAM_DIV = 2.5        # beam divergence in mrad
+BEAM_FOCUS = 0.0      # beam focus relative to beam starting position, positive if upstream (defocussed)
+ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
+
+# ripple filter material ID, change according to mat.dat, and AIR if no RIFI
+MAT_RIFI = 4          # PMMA
+MAT_NORIFI = 2        # AIR
+
+# Zone number oif RIFI, as specified in geo.dat
+ZONE_RIFI = 4
+
+# list of external stopping powers
+DEDX_LIST = ("Water.txt", "Lucite.txt", "Air.txt", "Ti.txt")
+
 
 class Ion(object):
     """
@@ -43,6 +57,10 @@ class Template(object):
 
         self.rifi_path = ""  # relative path from current wdir to rifi path.
         self.template_dir = ""
+
+    @staticmethod
+    def fwhm_to_sigma(fwhm):
+        return fwhm / (2.0 * np.sqrt(2.0 * np.log(2.0)))
 
     def read(self, dir):
         """
@@ -89,8 +107,7 @@ class Template(object):
             file.writelines(self.det)
 
         # create symlinks to external stopping power files.
-        dedx_list = ["Water.txt", "Lucite.txt"]
-        for fn in dedx_list:
+        for fn in DEDX_LIST:
             try:
                 os.symlink(os.path.join("../../../..", self.template_dir, fn), os.path.join(self.path, fn))
             except FileExistsError:
@@ -101,10 +118,10 @@ class Template(object):
         Generate the input files for SH12A, and store these to self.
         """
         if rifi:
-            r = 2
+            r = MAT_RIFI
             _rifidir = "RF3MM"
         else:
-            r = 0
+            r = MAT_NORIFI
             _rifidir = "RF0MM"
 
         # TODO: rename "path" -> "dir"
@@ -116,15 +133,21 @@ class Template(object):
             self.beam.append("HIPROJ     	{:2d}    {:2d}\n".format(ion.n, ion.z))  # OK to add at the bottom
 
         self.beam = [line.replace('$ENERGY', "{:7.2f}".format(energy)) for line in self.beam]
-        self.beam = [line.replace('$SIGX', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
-        self.beam = [line.replace('$SIGY', "{:5.2f}".format(ion.fwhm / 2.355)) for line in self.beam]
+        self.beam = [line.replace('$D_ENERGY', "{:9.2f}".format(energy * ENERGY_SPREAD)) for line in self.beam]
+        _sigma = self.fwhm_to_sigma(ion.fwhm)
+        self.beam = [line.replace('$SIGX', "{:6.3f}".format(_sigma)) for line in self.beam]
+        self.beam = [line.replace('$SIGY', "{:6.3f}".format(_sigma)) for line in self.beam]
         self.beam = [line.replace('$NSTAT', "{:6d}".format(nstat)) for line in self.beam]
         self.beam = [line.replace('$NSAVE', "{:6d}".format(nsave)) for line in self.beam]
+
+        self.beam.append("BEAMDIV        {:6.3f} {:6.3f} {:6.3f}  ! beam divergence \n".format(BEAM_DIV,
+                                                                                               BEAM_DIV,
+                                                                                               BEAM_FOCUS))
 
         if rifi:
             self.beam.append("BMODMC          1                ! For MC ripple filter\n")
             # specifying zone 4, and filename of ripple filter
-            self.beam.append("USEBMOD         4 {}\n".format(self.rifi_path))
+            self.beam.append("USEBMOD         {:d} {}\n".format(ZONE_RIFI, self.rifi_path))
 
         self.geo = [line.replace('$RIF', "{:4d}".format(r)) for line in self.tgeo]
 
