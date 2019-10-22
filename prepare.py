@@ -5,6 +5,8 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
+# TODO: these could be moved to the config file
 BEAM_DIV = 2.5        # beam divergence in mrad
 BEAM_FOCUS = 0.0      # beam focus relative to beam starting position, positive if upstream (defocussed)
 ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
@@ -13,7 +15,7 @@ ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
 MAT_RIFI = 4          # PMMA
 MAT_NORIFI = 2        # AIR
 
-# Zone number oif RIFI, as specified in geo.dat
+# Zone number if RIFI, as specified in geo.dat
 ZONE_RIFI = 4
 
 # list of external stopping powers
@@ -60,6 +62,9 @@ class Template(object):
 
     @staticmethod
     def fwhm_to_sigma(fwhm):
+        """
+        Converts FWHM to 1 sigma value.
+        """
         return fwhm / (2.0 * np.sqrt(2.0 * np.log(2.0)))
 
     def read(self, dir):
@@ -184,8 +189,8 @@ def main(args):
     Main function.
     """
     logger.setLevel('INFO')
-    nstat = 10000
-    nsave = 5000
+    nstat = 200000
+    nsave = 50000
 
     ions = read_config("config.dat")
 
