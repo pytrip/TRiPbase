@@ -21,3 +21,8 @@ $ ./submit.sh
 ```
 $ ./postprocess.sh
 ```
+
+5) You can collect all the resulting .ddd files into an archive using tar:
+```
+find . -name "*.ddd" | tar -cvf my_archive.tar -T -
+```
