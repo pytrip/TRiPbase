@@ -8,6 +8,6 @@ do
 	cd $shdir
 	echo $shdir
 	# echo sbatch --array 0-16 rsshield.sh
-	echo sbatch ../../../../rsshield.sh
+	echo sbatch --array 0 ../../../../rsshield.sh
 	cd ${wdir}/wdir
 done
