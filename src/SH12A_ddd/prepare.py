@@ -32,7 +32,6 @@ class Ion(object):
         self.jpart = 0
         self.z = 0
         self.n = 0
-        self.u = 0.0
         self.emin = 0.0
         self.emax = 0.0
         self.estep = 0.0
@@ -166,7 +165,7 @@ def read_config(fname):
     """
     temp_str = np.loadtxt(fname, dtype=str, usecols=0)
     temp_int = np.loadtxt(fname, dtype=int, usecols=(1, 2, 3))
-    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7, 8))
+    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7))
 
     ions = [None] * len(temp_str)
 
@@ -176,11 +175,10 @@ def read_config(fname):
         ions[i].jpart = temp_int[i][0]
         ions[i].z = temp_int[i][1]
         ions[i].n = temp_int[i][2]
-        ions[i].u = temp_float[i][0]
-        ions[i].emin = temp_float[i][1]
-        ions[i].emax = temp_float[i][2]
-        ions[i].estep = temp_float[i][3]
-        ions[i].fwhm = temp_float[i][4]
+        ions[i].emin = temp_float[i][0]
+        ions[i].emax = temp_float[i][1]
+        ions[i].estep = temp_float[i][2]
+        ions[i].fwhm = temp_float[i][3]
     return ions
 
 
