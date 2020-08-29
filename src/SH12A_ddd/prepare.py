@@ -6,9 +6,10 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-# TODO: these could be moved to the config file
+# These are constant now, but the idea is that a more realistic beam model can be added, where these vary
+# as a function of energy and particle species.
 BEAM_DIV = 2.5        # beam divergence in mrad
-BEAM_FOCUS = 0.0      # beam focus relative to beam starting position, positive if upstream (defocussed)
+BEAM_FOCUS = -200.0      # beam focus relative to beam starting position, positive if upstream (defocussed)
 ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
 
 # ripple filter material ID, change according to mat.dat, and AIR if no RIFI
@@ -32,7 +33,6 @@ class Ion(object):
         self.jpart = 0
         self.z = 0
         self.n = 0
-        self.u = 0.0
         self.emin = 0.0
         self.emax = 0.0
         self.estep = 0.0
@@ -166,7 +166,7 @@ def read_config(fname):
     """
     temp_str = np.loadtxt(fname, dtype=str, usecols=0)
     temp_int = np.loadtxt(fname, dtype=int, usecols=(1, 2, 3))
-    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7, 8))
+    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7))
 
     ions = [None] * len(temp_str)
 
@@ -176,11 +176,10 @@ def read_config(fname):
         ions[i].jpart = temp_int[i][0]
         ions[i].z = temp_int[i][1]
         ions[i].n = temp_int[i][2]
-        ions[i].u = temp_float[i][0]
-        ions[i].emin = temp_float[i][1]
-        ions[i].emax = temp_float[i][2]
-        ions[i].estep = temp_float[i][3]
-        ions[i].fwhm = temp_float[i][4]
+        ions[i].emin = temp_float[i][0]
+        ions[i].emax = temp_float[i][1]
+        ions[i].estep = temp_float[i][2]
+        ions[i].fwhm = temp_float[i][3]
     return ions
 
 
