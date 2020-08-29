@@ -1,28 +1,11 @@
 Introduction
 ------------
-This script collection calculates depth dose beam kernel data for the treatment planning system TRiP98 using the Monte Carlo particle transport code [SHIELD-HIT12A](https://shieldhit.org).
+TRiPbase provides links to public base data sets and scripts for generating new base data from various MC codes.
 
-Usage
------
+Codes used:
+- [SHIELD-HIT12A](https://shieldhit.org).
 
-1) modify `config.dat` file with files and energy ranges, etc.
 
-2) Autogenerate directories:
-```
-$ python3 prepare.py
-```
+Links to available base data sets can be found in the `data/` directories.
 
-3) Submit to cluster to calculate them
-```
-$ ./submit.sh
-```
-
-4) Process results
-```
-$ ./postprocess.sh
-```
-
-5) You can collect all the resulting .ddd files into an archive using tar:
-```
-find . -name "*.ddd" | tar -cvf my_archive.tar -T -
-```
+TODO: maybe also list some here.
