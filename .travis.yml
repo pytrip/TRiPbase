@@ -13,6 +13,8 @@ matrix:
 
 sudo: false
 
+install: pip install flake8
+
 # run tests
 script:
   - flake8 .
