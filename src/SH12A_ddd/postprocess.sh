@@ -1,11 +1,27 @@
 wdir=`pwd`  # present working directory
+ddir=../../../data/ddd  # target directory for resulting data, relative to wdir/.
+
+mkdir -p $ddir
 
 cd ${wdir}/wdir
 for shdir in $(find . -mindepth 3 -maxdepth 3 -type d )
 do
+    echo
+    echo "Processing directory: "$shdir
+
 	cd $shdir
-	echo $shdir
-	# echo sbatch --array 0-16 rsshield.sh
-	echo convertmc tripddd --many "*.bdo" --energy 0  # TODO: find a way to put in energy MeV/amu
-	cd ${wdir}/wdir
+
+	convertmc tripddd --many "*.bdo"
+    cd ${wdir}/wdir
+
+    # strip energy directory from dir current dir name
+    tdir=`dirname $shdir`
+
+    # build target directory
+    targetdir=$ddir/$tdir
+    mkdir -p $targetdir
+
+    #copy ddd file to proper place
+    cp -v $shdir/*.ddd $targetdir/.
+
 done
