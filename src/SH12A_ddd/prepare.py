@@ -6,9 +6,10 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-# TODO: these could be moved to the config file
+# These are constant now, but the idea is that a more realistic beam model can be added, where these vary
+# as a function of energy and particle species.
 BEAM_DIV = 2.5        # beam divergence in mrad
-BEAM_FOCUS = 0.0      # beam focus relative to beam starting position, positive if upstream (defocussed)
+BEAM_FOCUS = -200.0      # beam focus relative to beam starting position, positive if upstream (defocussed)
 ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
 
 # ripple filter material ID, change according to mat.dat, and AIR if no RIFI

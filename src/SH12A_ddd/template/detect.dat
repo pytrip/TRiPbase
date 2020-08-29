@@ -1,9 +1,9 @@
 Geometry Cyl
-    Name MyCyl                    ! geometry type
+    Name MyCyl
     R  0.0  40.0   800
     Z  0.0  50.0   500
 
 Output
-    Filename nb_ddd.bdo
+    Filename output.bdo
     Geo MyCyl
     Quantity DDD
