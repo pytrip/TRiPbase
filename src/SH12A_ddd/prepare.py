@@ -13,8 +13,8 @@ BEAM_FOCUS = -200.0      # beam focus relative to beam starting position, positi
 ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
 
 # ripple filter material ID, change according to mat.dat, and AIR if no RIFI
-MAT_RIFI = 4          # PMMA
-MAT_NORIFI = 2        # AIR
+MAT_RIFI = 3          # PMMA
+MAT_NORIFI = 4        # AIR
 
 # Zone number if RIFI, as specified in geo.dat
 ZONE_RIFI = 4

@@ -5,10 +5,10 @@
   RPP    1     -30.0      30.0     -30.0      30.0       0.0      60.0
 * vacuum beam pipe
   RCC    2       0.0       0.0    -300.0       0.0       0.0     150.0
-                60.0
+                 6.0
 * exit foil
   RCC    3       0.0       0.0    -150.0       0.0       0.0     0.025
-                60.0
+                 6.0
 * possible ripple filter
   RPP    4     -10.0      10.0     -10.0      10.0     -60.3     -60.0
 * surrounding air
