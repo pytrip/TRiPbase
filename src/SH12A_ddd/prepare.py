@@ -13,8 +13,8 @@ BEAM_FOCUS = -200.0      # beam focus relative to beam starting position, positi
 ENERGY_SPREAD = 0.01  # relative energy spread 0.01 = 1 %.
 
 # ripple filter material ID, change according to mat.dat, and AIR if no RIFI
-MAT_RIFI = 4          # PMMA
-MAT_NORIFI = 2        # AIR
+MAT_RIFI = 3          # PMMA
+MAT_NORIFI = 4        # AIR
 
 # Zone number if RIFI, as specified in geo.dat
 ZONE_RIFI = 4
@@ -37,6 +37,7 @@ class Ion(object):
         self.emax = 0.0
         self.estep = 0.0
         self.fwhm = 0.0
+        self.amuratio = 0.0
 
 
 class Template(object):
@@ -121,6 +122,7 @@ class Template(object):
     def generate_dats(self, ion, energy, nstat, nsave, rifi=False):
         """
         Generate the input files for SH12A, and store these to self.
+        Input energy must be in E/amu, not in E/nucleon.
         """
         if rifi:
             r = MAT_RIFI
@@ -137,8 +139,9 @@ class Template(object):
         if ion.jpart == 25:  # Heavy ions
             self.beam.append("HIPROJ     	{:2d}    {:2d}\n".format(ion.n, ion.z))  # OK to add at the bottom
 
-        self.beam = [line.replace('$ENERGY', "{:7.2f}".format(energy)) for line in self.beam]
-        self.beam = [line.replace('$D_ENERGY', "{:9.2f}".format(energy * ENERGY_SPREAD)) for line in self.beam]
+        _e_nuc = energy * ion.amuratio
+        self.beam = [line.replace('$ENERGY', "{:12.5f}".format(_e_nuc)) for line in self.beam]
+        self.beam = [line.replace('$D_ENERGY', "{:12.5f}".format(_e_nuc * ENERGY_SPREAD)) for line in self.beam]
         _sigma = self.fwhm_to_sigma(ion.fwhm)
         self.beam = [line.replace('$SIGX', "{:6.3f}".format(_sigma)) for line in self.beam]
         self.beam = [line.replace('$SIGY', "{:6.3f}".format(_sigma)) for line in self.beam]
@@ -166,7 +169,7 @@ def read_config(fname):
     """
     temp_str = np.loadtxt(fname, dtype=str, usecols=0)
     temp_int = np.loadtxt(fname, dtype=int, usecols=(1, 2, 3))
-    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7))
+    temp_float = np.loadtxt(fname, dtype=float, usecols=(4, 5, 6, 7, 8))
 
     ions = [None] * len(temp_str)
 
@@ -180,6 +183,7 @@ def read_config(fname):
         ions[i].emax = temp_float[i][1]
         ions[i].estep = temp_float[i][2]
         ions[i].fwhm = temp_float[i][3]
+        ions[i].amuratio = temp_float[i][4]
     return ions
 
 
