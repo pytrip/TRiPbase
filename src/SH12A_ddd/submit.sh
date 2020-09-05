@@ -7,7 +7,6 @@ for shdir in $(find . -mindepth 3 -maxdepth 3 -type d )
 do
 	cd $shdir
 	echo $shdir
-	# echo sbatch --array 0-16 rsshield.sh
-	echo sbatch --array 0 ../../../../rsshield.sh
+	sbatch --array 0 ../../../../rsshield.sh
 	cd ${wdir}/wdir
 done

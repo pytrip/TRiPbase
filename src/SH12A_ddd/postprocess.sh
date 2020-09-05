@@ -15,22 +15,17 @@ echo "-----------">> README.md
 echo "(add your description here)" >> README.md
 echo "" >> README.md
 
-#switch to wdir and build all
+#switch to wdir and convert all bdo files to ddd files
 cd $pwdir/$wdir
 for shdir in $(find . -mindepth 3 -maxdepth 3 -type d )
 do
     echo
     echo "Processing directory: "$wdir/$shdir
 
-	cd $shdir
-	echo convertmc tripddd --many "*.bdo"
+	  cd $shdir
+	  convertmc tripddd --many "*.bdo"
     cd $pwdir
-
-    # strip energy directory from dir current dir name
-    tdir=`dirname $shdir`
-
-    # build energy specific target directory and copy ddd file to it
-    targetdir=$ddir/$tdir
-    mkdir -p $targetdir
-    echo cp -v $shdir/*.ddd $targetdir/.
 done
+
+cd $pwdir
+find $wdir -name "*.ddd"  | xargs -i sh -c 'echo {}; echo {} | mkdir -p $ddir/`cut -d/ -f3-4`/; cp -v {} $ddir/`cut -d/ -f3-4`/'

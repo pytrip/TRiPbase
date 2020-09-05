@@ -68,16 +68,16 @@ class Template(object):
         """
         return fwhm / (2.0 * np.sqrt(2.0 * np.log(2.0)))
 
-    def read(self, dir):
+    def read(self, dir_path):
         """
         Reads the template files, and stores them in self object.
         """
-        fname_beam = os.path.join(dir, "beam.dat")
-        fname_geo = os.path.join(dir, "geo.dat")
-        fname_mat = os.path.join(dir, "mat.dat")
-        fname_det = os.path.join(dir, "detect.dat")
+        fname_beam = os.path.join(dir_path, "beam.dat")
+        fname_geo = os.path.join(dir_path, "geo.dat")
+        fname_mat = os.path.join(dir_path, "mat.dat")
+        fname_det = os.path.join(dir_path, "detect.dat")
 
-        self.template_dir = dir
+        self.template_dir = dir_path
 
         with open(fname_beam) as file:
             self.tbeam = file.readlines()
@@ -88,7 +88,7 @@ class Template(object):
         with open(fname_det) as file:
             self.tdet = file.readlines()
 
-    def write(self, ion):
+    def write(self):
         """
         Write the SH12A output files to self.path for given ion.
         Stopping power files are symlinked to the files found in template/
@@ -205,9 +205,9 @@ def main(args):
         logger.info(ion.name)
         for energy in np.arange(ion.emin, ion.emax, ion.estep):
             t.generate_dats(ion, energy, nstat, nsave, rifi=True)
-            t.write(ion)
+            t.write()
             t.generate_dats(ion, energy, nstat, nsave, rifi=False)
-            t.write(ion)
+            t.write()
 
 
 if __name__ == '__main__':
